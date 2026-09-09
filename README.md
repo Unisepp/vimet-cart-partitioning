@@ -17,19 +17,18 @@ airfoil_self_noise
 For each dataset, two models are trained on the same 80/20 train/test
 split and compared on held-out RMSE:
 
-- **Global** — one AutoGluon predictor trained on the full training set.
-- **Data-Driven (CART-Leaf)** — a `DecisionTreeRegressor` partitions
+- **Global**: one AutoGluon predictor trained on the full training set.
+- **Data-Driven**: a `DecisionTreeRegressor` partitions
   the training data into leaves, and a separate AutoGluon predictor is
   trained per leaf.
 
 
 ## Files
 
-- `download_demo_datasets.py` — downloads the 5 datasets above from
+- `download_demo_datasets.py` - downloads the 5 datasets above from
   suite 353 into `data/<dataset>/raw.csv`.
 - `data_generic.py` — train/test split (80/20, seed 42).
 - `cart_auto_tuning.py` — hyperparameter selection for CART
-  (`min_samples_leaf`, `max_leaf_nodes`).
 - `cart_generic.py` — fits the CART tree and assigns each row a
   `leaf_id`.
 - `train_global_generic.py` — trains the Global AutoGluon model.
@@ -48,6 +47,4 @@ python download_demo_datasets.py
 python run_demo_pipeline.py
 ```
 
-`run_demo_pipeline.py` writes `demo_results.csv` with one row per
-dataset: `dataset, samples, rmse_global, rmse_leaf, improvement_pct`.
 
