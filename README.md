@@ -16,21 +16,20 @@ video_transcoding
 
 ## Approach
 
-For each dataset, two models are trained on the same 80/20 train/test
+First, each candidate dataset is screened for
+genuine heterogeneity via HDBSCAN clustering on its feature space: a
+dataset only proceeds to the model comparison if it has real cluster
+structure (>=2 clusters) with no more than 50% of rows falling outside
+any cluster ("noise").
+For each remaining dataset, two models are trained on the same 80/20 train/test
 split and compared on held-out RMSE:
 
 - **Global**: one AutoGluon predictor trained on the full training set.
 - **Data-Driven**: a `DecisionTreeRegressor` (CART) partitions the
-  training data into leaves (leaf count chosen by cross-validated RMSE
-  on the training split), and a separate AutoGluon predictor is
+  training data into leaves, and a separate AutoGluon predictor is
   trained per leaf.
 
-Before either model is trained, each candidate dataset is screened for
-genuine heterogeneity via HDBSCAN clustering on its feature space
-(independent of the CART tree, and without looking at test RMSE): a
-dataset only proceeds to the model comparison if it has real cluster
-structure (>=2 clusters) with no more than 50% of rows falling outside
-any cluster ("noise").
+
 
 ## Files
 
