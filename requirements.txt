@@ -4,3 +4,6 @@ scikit-learn
 matplotlib
 openml
 autogluon.tabular
+diptest
+scipy
+requests
