@@ -53,14 +53,16 @@ any cluster ("noise").
   split -> CART -> train Global + per-leaf AutoGluon models ->
   evaluate; writes `clustered_selection_results.csv`.
 
+## Prerequisites
+
+- [uv](https://docs.astral.sh/uv/) for dependency and interpreter
+  management. Install it once with `brew install uv` or
+  `curl -LsSf https://astral.sh/uv/install.sh | sh`.
+- No separate Python install is needed: `pyproject.toml`/`.python-version`
+  pin the exact interpreter (3.12.7), and `uv sync` downloads it
+  automatically if it isn't already on your machine.
+
 ## Running
-
-This project uses [uv](https://docs.astral.sh/uv/) to manage its Python
-version and dependencies. `pyproject.toml` pins the exact interpreter
-(3.12.7); `uv sync` installs that interpreter automatically if it isn't
-already on your machine, along with the dependencies, into a local `.venv`.
-
-Run the following commands in cli.
 
 ```bash
 uv sync
@@ -69,15 +71,22 @@ uv run heterogeneity_check.py
 uv run run_pipeline.py
 ```
 
+`uv sync` creates a local `.venv` and installs everything from
+`pyproject.toml`. Each `uv run` step then runs in that environment
+without needing it activated.
+
 ## Results
 
-The results of this experiment are for demonstration purposes only;
-they act as a public proxy for the non-disclosure production fabrication
-data.
+The results here are for demonstration purposes only; they act as a
+public proxy for the non-disclosure production fabrication data.
+
+`run_pipeline.py` writes per-dataset RMSE for both models to
+`clustered_selection_results.csv`, and `cart.py` saves each dataset's
+fitted tree to `figures/<dataset>/cart_tree.png`.
 
 Comparing raw RMSE values shows that the Data-Driven approach wins in
-3 out of the 6 datasets, is a near-tie in 1, and loses in the remaining
-2. This shows that partitioning does not help in every case: it needs
-enough heterogeneity in the data to be worth capturing, and enough data
-points overall, since splitting the training data across leaves can
-hurt predictive performance when it leaves too few rows per leaf.
+3 of the 6 datasets, is a near-tie in 1, and loses in the remaining 2.
+Partitioning does not help in every case: it needs enough heterogeneity
+in the data to be worth capturing, and enough data points overall,
+since splitting the training data across leaves can hurt predictive
+performance when it leaves too few rows per leaf.
