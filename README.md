@@ -62,7 +62,7 @@ split and compared on held-out RMSE:
   automatically if it isn't already on your machine.
 
 ## Running
-
+Run these commands in order to execute the pipeline. 
 ```bash
 uv sync
 uv run download_all_ctr23.py
@@ -83,9 +83,18 @@ public proxy for the non-disclosure production fabrication data.
 `clustered_selection_results.csv`, and `cart.py` saves each dataset's
 fitted tree to `figures/<dataset>/cart_tree.png`.
 
+| Dataset | Leaves | Global RMSE | Data-Driven RMSE | Improvement |
+|---|---|---|---|---|
+| naval_propulsion_plant | 10 | 0.000542 | 0.000321 | +40.78% |
+| video_transcoding | 10 | 0.822 | 0.790 | +3.92% |
+| brazilian_houses | 2 | 2214.45 | 2186.27 | +1.27% |
+| cps88wages | 4 | 363.94 | 363.97 | -0.01% |
+| abalone | 4 | 2.168 | 2.218 | -2.32% |
+| diamonds | 10 | 514.09 | 526.67 | -2.45% |
+
 Comparing raw RMSE values shows that the Data-Driven approach wins in
-3 of the 6 datasets, is a near-tie in 1, and loses in the remaining 2.
-Partitioning does not help in every case: it needs enough heterogeneity
-in the data to be worth capturing, and enough data points overall,
-since splitting the training data across leaves can hurt predictive
-performance when it leaves too few rows per leaf.
+3 of the 6 datasets, ties in 1, and loses in the remaining 2.
+By conducting the experiments, we saw that partitioning is a helpful strategy for heterogeneous virtual metrology data, but it does not generalize to every dataset. It needs enough heterogeneity in the data to be worth capturing, and enough data points overall, since splitting the training data across leaves can hurt predictive performance when it leaves too few rows per leaf.
+
+*Note: AutoGluon training is not fully deterministic, so rerunning the
+pipeline may give slightly different numbers.*
