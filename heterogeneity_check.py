@@ -36,8 +36,6 @@ from cart_auto_tuning import compute_min_samples_leaf
 
 TARGET_COL = "target"
 DATA_ROOT = "data"
-HDBSCAN_SAMPLE_CAP = 60_000
-RNG_SEED = 42
 MAX_NOISE_PCT = 50.0
 
 CTR23_DATASETS = {
@@ -89,8 +87,7 @@ def target_variance_reduction(y, labels):
     return (1 - within / global_var) * 100
 
 
-def compute_one(name, data_root=DATA_ROOT, rng_seed=RNG_SEED,
-                 sample_cap=HDBSCAN_SAMPLE_CAP, max_noise_pct=MAX_NOISE_PCT):
+def compute_one(name, data_root=DATA_ROOT, max_noise_pct=MAX_NOISE_PCT):
     raw_path = os.path.join(data_root, name, "raw.csv")
     if not os.path.isfile(raw_path):
         return {"dataset": name, "status": f"missing {raw_path}"}
@@ -104,14 +101,6 @@ def compute_one(name, data_root=DATA_ROOT, rng_seed=RNG_SEED,
     min_cluster_size = compute_min_samples_leaf(n_rows)
     if n_rows < 2 * min_cluster_size:
         return {"dataset": name, "status": f"too few rows ({n_rows}) for min_cluster_size={min_cluster_size}"}
-
-    rng = np.random.default_rng(rng_seed)
-    if n_rows > sample_cap:
-        idx = rng.choice(n_rows, sample_cap, replace=False)
-        X = X.iloc[idx]
-        y = y.iloc[idx]
-        n_rows = sample_cap
-        print(f"{name}: subsampled to {sample_cap} rows for HDBSCAN tractability")
 
     X_scaled = StandardScaler().fit_transform(X)
     y_arr = y.to_numpy()
