@@ -1,25 +1,21 @@
-"""Runs Global vs. Data-Driven on the 5 demo datasets and writes demo_results.csv."""
+"""Runs the Global vs. Data-Driven comparison for the eligible list
+of datasets: split -> CART -> train Global + per-leaf AutoGluon models ->
+evaluate. Called by run_filtered_datasets.py with the dataset list
+read from results/cluster_heterogeneity_check.csv.
+"""
 import os
 import traceback
 
 import pandas as pd
 
 from cart_auto_tuning import is_dataset_viable_for_cart_leaf, compute_min_samples_leaf
-import data_generic as data
-import cart_generic as cart
-import train_global_generic as train_global
-import train_cart_leaf_generic as train_cart_leaf
-import evaluate_generic as evaluate
+import data
+import cart
+import train_global_model
+import train_cart_model
+import evaluate
 
 TARGET_COL = "target"
-
-DEMO_DATASETS = [
-    "naval_propulsion_plant",
-    "video_transcoding",
-    "auction_verification",
-    "socmob",
-    "airfoil_self_noise",
-]
 
 
 def _safe_name(value):
@@ -27,7 +23,17 @@ def _safe_name(value):
     return "".join(c if (c.isalnum() or c in "-_.") else "_" for c in s)
 
 
-def run_one_dataset(dataset_name, df, cart_min_samples_leaf=None, cart_leaf_grid=None):
+def _global_model_exists(save_path):
+    """True if save_path already holds a saved AutoGluon predictor."""
+    return os.path.isfile(os.path.join(save_path, "predictor.pkl"))
+
+
+def run_one_dataset(dataset_name, df, reuse_global=False):
+    """Splits the data, fits CART (default hyperparameters, CV-selected leaf
+    count), trains the Global and per-leaf AutoGluon models, and evaluates
+    both on the test split.
+
+    """
     safe_name = _safe_name(dataset_name)
     data_dir = os.path.join("data", safe_name)
     figures_dir = os.path.join("figures", safe_name)
@@ -43,20 +49,12 @@ def run_one_dataset(dataset_name, df, cart_min_samples_leaf=None, cart_leaf_grid
         csv_path=raw_csv, target_col=TARGET_COL, train_path=train_path, test_path=test_path,
     )
 
-    effective_min_samples_leaf = (
-        cart_min_samples_leaf if cart_min_samples_leaf is not None
-        else compute_min_samples_leaf(len(train_df))
-    )
+    effective_min_samples_leaf = compute_min_samples_leaf(len(train_df))
     if not is_dataset_viable_for_cart_leaf(len(train_df), effective_min_samples_leaf):
         print(f"SKIP: only {len(train_df)} training rows.")
         return None
 
-    cart_kwargs = {}
-    if cart_min_samples_leaf is not None:
-        cart_kwargs["min_samples_leaf"] = cart_min_samples_leaf
-    if cart_leaf_grid is not None:
-        cart_kwargs["leaf_grid"] = cart_leaf_grid
-    cart_result = cart.run(train_df, test_df, target_col=TARGET_COL, figures_dir=figures_dir, **cart_kwargs)
+    cart_result = cart.run(train_df, test_df, target_col=TARGET_COL, figures_dir=figures_dir)
     if cart_result is None:
         return None
 
@@ -68,8 +66,11 @@ def run_one_dataset(dataset_name, df, cart_min_samples_leaf=None, cart_leaf_grid
     global_save_path = os.path.join(models_dir, "global")
     leaf_save_root = os.path.join(models_dir, "per_leaf")
 
-    train_global.train(train_csv=train_path, target_col=TARGET_COL, save_path=global_save_path)
-    train_cart_leaf.train(train_csv=train_leaf_path, target_col=TARGET_COL, save_root=leaf_save_root)
+    if reuse_global and _global_model_exists(global_save_path):
+        print(f"[reuse] Global model already exists at {global_save_path}, skipping retrain.")
+    else:
+        train_global_model.train(train_csv=train_path, target_col=TARGET_COL, save_path=global_save_path)
+    train_cart_model.train(train_csv=train_leaf_path, target_col=TARGET_COL, save_root=leaf_save_root)
 
     overall_results, leaf_comparison_df = evaluate.evaluate(
         test_csv=test_leaf_path, target_col=TARGET_COL,
@@ -86,8 +87,7 @@ def run_one_dataset(dataset_name, df, cart_min_samples_leaf=None, cart_leaf_grid
     }
 
 
-def main(datasets=None, data_root="data"):
-    datasets = datasets or DEMO_DATASETS
+def main(datasets, data_root="data", output_path="results.csv", reuse_global=False):
     all_results, skipped = [], []
 
     for name in datasets:
@@ -100,7 +100,7 @@ def main(datasets=None, data_root="data"):
         df = pd.read_csv(raw_path)
         print(f"=== {name} ({len(df)} rows) ===")
         try:
-            result = run_one_dataset(name, df)
+            result = run_one_dataset(name, df, reuse_global=reuse_global)
             if result is None:
                 skipped.append({"dataset": name, "reason": "see log above"})
             else:
@@ -118,11 +118,19 @@ def main(datasets=None, data_root="data"):
         )
 
     print(f"Ran {len(all_results)}/{len(datasets)} datasets.")
-    results_df.to_csv("demo_results.csv", index=False)
+    results_df.to_csv(output_path, index=False)
+    print(f"Wrote results to {output_path}")
     return results_df
 
 
 if __name__ == "__main__":
-    import sys
-    only = sys.argv[1:] if len(sys.argv) > 1 else None
-    main(datasets=only)
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("datasets", nargs="+", help="dataset name(s) to run (required -- no default list)")
+    parser.add_argument("--data-root", default="data")
+    parser.add_argument("--output", default="results.csv")
+    parser.add_argument("--reuse-global", action="store_true",
+                         help="skip retraining the Global model where one already exists on disk")
+    args = parser.parse_args()
+    main(datasets=args.datasets, data_root=args.data_root, output_path=args.output,
+         reuse_global=args.reuse_global)
