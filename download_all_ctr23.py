@@ -1,5 +1,5 @@
-"""Downloads all 33 CTR-23 datasets to be filtered by cluster_heterogeneity_check.py to the heterogeneous candidates.
-It downloades each dataset from OpenML and writes each to data/<name>/raw.csv.
+"""Downloads all 33 CTR-23 datasets to be filtered by heterogeneity_check.py to the heterogeneous candidates.
+It downloads each dataset from OpenML and writes each to data/<name>/raw.csv.
 """
 import argparse
 import os

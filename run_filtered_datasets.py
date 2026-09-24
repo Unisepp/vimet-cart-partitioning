@@ -1,5 +1,5 @@
 """Runs the Global vs. Data-Driven (CART-leaf) model comparison on whichever datasets currently pass the heterogeneity check in
-results/cluster_heterogeneity_check.csv (from cluster_heterogeneity_check.py):
+results/heterogeneity_check.csv (from heterogeneity_check.py):
 real HDBSCAN cluster structure found, and noise_fraction_pct at or below MAX_NOISE_PCT threshold.
 It leads to the paper's 6-dataset CTR23 demonstration set
 (tab:demo-results): abalone, brazilian_houses, cps88wages, diamonds,
@@ -12,12 +12,12 @@ import pandas as pd
 
 import run_pipeline as pipeline
 
-DEFAULT_CHECK_CSV = "results/cluster_heterogeneity_check.csv"
+DEFAULT_CHECK_CSV = "results/heterogeneity_check.csv"
 OUTPUT_CSV = "clustered_selection_results.csv"
 
 
 def get_dataset_list(check_csv=DEFAULT_CHECK_CSV):
-    """cluster_heterogeneity_check.py only ever writes rows that already
+    """heterogeneity_check.py only ever writes rows that already
     pass the heterogeneity check, so every dataset name in this CSV is
     eligible, no further filtering needed here."""
     df = pd.read_csv(check_csv)
@@ -69,7 +69,7 @@ if __name__ == "__main__":
                          help="override: run only these dataset names instead of "
                               "reading the list from --check-csv")
     parser.add_argument("--check-csv", default=DEFAULT_CHECK_CSV,
-                         help="output of cluster_heterogeneity_check.py")
+                         help="output of heterogeneity_check.py")
     parser.add_argument("--data-root", default="data")
     parser.add_argument("--output", default=OUTPUT_CSV)
     args = parser.parse_args()

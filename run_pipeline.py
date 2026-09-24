@@ -1,7 +1,7 @@
 """Runs the Global vs. Data-Driven comparison for the eligible list
 of datasets: split -> CART -> train Global + per-leaf AutoGluon models ->
 evaluate. Called by run_filtered_datasets.py with the dataset list
-read from results/cluster_heterogeneity_check.csv.
+read from results/heterogeneity_check.csv.
 """
 import os
 import traceback
