@@ -48,12 +48,10 @@ any cluster ("noise").
 - `train_cart_model.py` -- trains one AutoGluon model per leaf.
 - `evaluate.py` -- scores both models on the test set; writes per-row
   and per-leaf RMSE breakdowns.
-- `run_pipeline.py` -- runs the full pipeline (split -> CART -> train
-  -> evaluate) for a given list of datasets.
-- `run_filtered_datasets.py` -- runs `run_pipeline.py` over whichever
-  datasets currently pass the heterogeneity check (read from
-  `results/heterogeneity_check.csv`); writes
-  `clustered_selection_results.csv`.
+- `run_pipeline.py` -- for each dataset that currently passes
+  the heterogeneity check (read from `results/heterogeneity_check.csv`):
+  split -> CART -> train Global + per-leaf AutoGluon models ->
+  evaluate; writes `clustered_selection_results.csv`.
 
 ## Running
 
@@ -61,5 +59,6 @@ any cluster ("noise").
 pip install -r requirements.txt
 python download_all_ctr23.py
 python heterogeneity_check.py
-python run_filtered_datasets.py
+python run_pipeline.py
 ```
+## Resulst 
