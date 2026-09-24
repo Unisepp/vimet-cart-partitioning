@@ -94,7 +94,7 @@ fitted tree to `figures/<dataset>/cart_tree.png`.
 
 Comparing raw RMSE values shows that the Data-Driven approach wins in
 3 of the 6 datasets, ties in 1, and loses in the remaining 2.
-By conducting the experiments, we saw that partitioning is a helpful strategy for heterogeneous virtual metrology data, but it does not generalize to every dataset. It needs enough heterogeneity in the data to be worth capturing, and enough data points overall, since splitting the training data across leaves can hurt predictive performance when it leaves too few rows per leaf.
+By conducting the experiments, we saw that partitioning is a helpful strategy for heterogeneous virtual metrology data, but it does not generalize to every dataset. It needs enough heterogeneity in the data to be worth capturing, and enough data points overall, since splitting the training data across leaves can hurt predictive performance when it leaves too few rows per leaf. Finally, in some cases the global model already handles the heterogeneity well, leaving little room for improvement.
 
 *Note: AutoGluon training is not fully deterministic, so rerunning the
 pipeline may give slightly different numbers.*
