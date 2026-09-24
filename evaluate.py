@@ -5,8 +5,8 @@ import pandas as pd
 from autogluon.tabular import TabularDataset
 from sklearn.metrics import mean_squared_error
 
-import train_global_generic as train_global
-import train_cart_leaf_generic as train_cart_leaf
+import train_global_model
+import train_cart_model
 
 TARGET = "target"
 
@@ -16,13 +16,13 @@ def rmse(y_true, y_pred):
 
 
 def evaluate(test_csv="data/test_df_with_leaf.csv", target_col=TARGET,
-             global_save_path=train_global.SAVE_PATH,
-             leaf_save_root=train_cart_leaf.SAVE_ROOT,
+             global_save_path=train_global_model.SAVE_PATH,
+             leaf_save_root=train_cart_model.SAVE_ROOT,
              results_dir="results"):
     test_df = pd.read_csv(test_csv)
 
-    global_model = train_global.load(save_path=global_save_path)
-    leaf_models = train_cart_leaf.load(save_root=leaf_save_root, train_df=test_df)
+    global_model = train_global_model.load(save_path=global_save_path)
+    leaf_models = train_cart_model.load(save_root=leaf_save_root, train_df=test_df)
 
     test_df["pred_global"] = global_model.predict(TabularDataset(test_df.drop(columns=["leaf_id"]))).values
 
