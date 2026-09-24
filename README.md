@@ -55,10 +55,29 @@ any cluster ("noise").
 
 ## Running
 
+This project uses [uv](https://docs.astral.sh/uv/) to manage its Python
+version and dependencies. `pyproject.toml` pins the exact interpreter
+(3.12.7); `uv sync` installs that interpreter automatically if it isn't
+already on your machine, along with the dependencies, into a local `.venv`.
+
+Run the following commands in cli.
+
 ```bash
-pip install -r requirements.txt
-python download_all_ctr23.py
-python heterogeneity_check.py
-python run_pipeline.py
+uv sync
+uv run download_all_ctr23.py
+uv run heterogeneity_check.py
+uv run run_pipeline.py
 ```
-## Resulst 
+
+## Results
+
+The results of this experiment are for demonstration purposes only;
+they act as a public proxy for the non-disclosure production fabrication
+data.
+
+Comparing raw RMSE values shows that the Data-Driven approach wins in
+3 out of the 6 datasets, is a near-tie in 1, and loses in the remaining
+2. This shows that partitioning does not help in every case: it needs
+enough heterogeneity in the data to be worth capturing, and enough data
+points overall, since splitting the training data across leaves can
+hurt predictive performance when it leaves too few rows per leaf.
