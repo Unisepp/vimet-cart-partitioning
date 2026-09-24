@@ -3,7 +3,7 @@ import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.tree import DecisionTreeRegressor, export_text
+from sklearn.tree import DecisionTreeRegressor, export_text, plot_tree
 
 from cart_auto_tuning import (
     is_dataset_viable_for_cart_leaf,
@@ -33,6 +33,9 @@ def prepare_features(train_df, test_df, target_col=TARGET, max_unique_ratio=0.5)
 
     tree_train = pd.get_dummies(tree_train, columns=categorical_cols, drop_first=False, dtype="int8")
     tree_test = pd.get_dummies(tree_test, columns=categorical_cols, drop_first=False, dtype="int8")
+    tree_train = tree_train.loc[:, ~tree_train.columns.duplicated()]
+    tree_test = tree_test.loc[:, ~tree_test.columns.duplicated()]
+
     tree_train, tree_test = tree_train.align(tree_test, join="left", axis=1, fill_value=0)
 
     cart_features = [c for c in tree_train.columns if c != target_col]
@@ -52,7 +55,7 @@ def prepare_features(train_df, test_df, target_col=TARGET, max_unique_ratio=0.5)
 def fit_final_tree(X_train, y_train, cart_features, best_leaf_count, best_min_leaf=MIN_SAMPLES_LEAF,
                     rng_seed=RNG_SEED):
     tree = DecisionTreeRegressor(
-        max_leaf_nodes=best_leaf_count, min_samples_leaf=best_min_leaf, random_state=rng_seed
+        max_leaf_nodes=best_leaf_count, min_samples_leaf=best_min_leaf, random_state=rng_seed,
     )
     tree.fit(X_train, y_train)
     print("Leaves:", tree.get_n_leaves())
@@ -60,23 +63,28 @@ def fit_final_tree(X_train, y_train, cart_features, best_leaf_count, best_min_le
     return tree
 
 
-def feature_importance(tree, cart_features, out_path="figures/cart_feature_importance.png",
-                        title="Top 5 Features Used by CART Tree for Splitting"):
-    feat_imp = pd.DataFrame({
-        "feature": cart_features, "importance": tree.feature_importances_,
-    }).sort_values("importance", ascending=False)
-    feat_imp = feat_imp[feat_imp["importance"] > 0]
-
+def plot_tree_figure(tree, cart_features, out_path="figures/cart_tree.png", title="CART Tree"):
+    """Renders the fitted tree's actual structure (splits, samples, values)"""
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
-    fig, ax = plt.subplots(figsize=(10, 7))
-    feat_imp.head(5).plot(kind="barh", x="feature", y="importance", ax=ax, legend=False, color="steelblue")
-    ax.set_xlabel("Feature Importance")
+    n_leaves = tree.get_n_leaves()
+    depth = max(tree.get_depth(), 1)
+    fig_width = max(10, 2.4 * n_leaves)
+    fig_height = max(6, 1.8 * depth)
+    fig, ax = plt.subplots(figsize=(fig_width, fig_height))
+    plot_tree(
+        tree,
+        feature_names=cart_features,
+        filled=True,
+        rounded=True,
+        impurity=False,
+        precision=2,
+        fontsize=9,
+        ax=ax,
+    )
     ax.set_title(title)
-    ax.invert_yaxis()
     plt.tight_layout()
-    fig.savefig(out_path, dpi=300)
+    fig.savefig(out_path, dpi=200)
     plt.close(fig)
-    return feat_imp
 
 
 def summarize_groups(frame, group_col, target_col=TARGET):
@@ -93,9 +101,9 @@ def summarize_groups(frame, group_col, target_col=TARGET):
 
 
 def run(train_df, test_df, target_col=TARGET, figures_dir="figures",
-        min_samples_leaf=None, leaf_grid=None, rng_seed=RNG_SEED):
-    """Prepares features, auto-tunes leaf count, fits the tree, attaches leaf_id."""
-    X_train, y_train, X_test, y_test, cart_features = prepare_features(train_df, test_df, target_col)
+        min_samples_leaf=None, leaf_grid=None, rng_seed=RNG_SEED, se_multiplier=None):
+    """Prepares features, auto-tunes leaf count via CV, fits the tree, attaches leaf_id."""
+    X_train, y_train, X_test, _, cart_features = prepare_features(train_df, test_df, target_col)
 
     if min_samples_leaf is None:
         min_samples_leaf = compute_min_samples_leaf(len(X_train))
@@ -108,10 +116,11 @@ def run(train_df, test_df, target_col=TARGET, figures_dir="figures",
     auto_select_kwargs = {"min_samples_leaf": min_samples_leaf}
     if leaf_grid is not None:
         auto_select_kwargs["leaf_grid"] = leaf_grid
+    if se_multiplier is not None:
+        auto_select_kwargs["se_multiplier"] = se_multiplier
     best_leaf_count, cv_results = auto_select_leaf_count(
         X_train, y_train, rng, rng_seed, **auto_select_kwargs
     )
-
     tree = fit_final_tree(X_train, y_train, cart_features, best_leaf_count, min_samples_leaf, rng_seed)
 
     train_df = train_df.copy()
@@ -119,7 +128,11 @@ def run(train_df, test_df, target_col=TARGET, figures_dir="figures",
     train_df["leaf_id"] = tree.apply(X_train)
     test_df["leaf_id"] = tree.apply(X_test)
 
-    feature_importance(tree, cart_features, out_path=os.path.join(figures_dir, "cart_feature_importance.png"))
+    plot_tree_figure(
+        tree, cart_features,
+        out_path=os.path.join(figures_dir, "cart_tree.png"),
+        title=f"CART Tree ({best_leaf_count} leaves)",
+    )
     leaf_summary_train = summarize_groups(train_df, "leaf_id", target_col)
 
     return {
