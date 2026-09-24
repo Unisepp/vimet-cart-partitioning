@@ -9,7 +9,7 @@ dependencies = [
     "scikit-learn",
     "matplotlib",
     "openml",
-    "autogluon.tabular",
+    "autogluon.tabular[all]",
     "diptest",
     "scipy",
     "requests",
