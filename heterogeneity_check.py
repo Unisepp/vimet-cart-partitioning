@@ -6,7 +6,7 @@ heterogeneity.
 
 HDBSCAN (a) picks its own number of clusters from the data
 and (b) labels points that don't belong to any sufficiently dense group as
-noise (label -1) rather than forcing them into one,so a dataset with no
+noise (label -1) rather than forcing them into one, so a dataset with no
 real structure can come back with zero clusters found.
 
 For each dataset with data/<name>/raw.csv already downloaded:
@@ -200,9 +200,9 @@ def main(datasets=None, data_root=DATA_ROOT, max_noise_pct=MAX_NOISE_PCT):
 
     # Only the datasets that pass the heterogeneity check remain.
     os.makedirs("results", exist_ok=True)
-    has_het.to_csv("results/cluster_heterogeneity_check.csv", index=False)
+    has_het.to_csv("results/heterogeneity_check.csv", index=False)
     print(f"\nWrote {len(has_het)} dataset(s) passing the heterogeneity check "
-          f"to results/cluster_heterogeneity_check.csv")
+          f"to results/heterogeneity_check.csv")
 
     missing = df[df["status"] != "ok"]
     if not missing.empty:
