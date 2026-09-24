@@ -1,7 +1,7 @@
-# Partitioning Strategies for Improving AutoML Performance on Heterogeneous Virtual Metrology Data: Public Demo (CTR-23)
+# Partitioning Strategies for Improving AutoML Performance on Heterogeneous Virtual Metrology Data: Public Demo (CTR23)
 
 Reproduces the paper's public demonstration: Global vs. Data-Driven
-RMSE on datasets from the OpenML CTR-23 regression benchmark suite
+RMSE on datasets from the OpenML CTR23 regression benchmark suite
 (suite 353) that pass a heterogeneity check -- currently 6 of the
 suite's 33 datasets:
 
@@ -33,7 +33,7 @@ split and compared on held-out RMSE:
 
 ## Files
 
-- `download_all_ctr23.py` -- downloads all 33 CTR-23 datasets from
+- `download_all_ctr23.py` -- downloads all 33 CTR23 datasets from
   suite 353 into `data/<dataset>/raw.csv`.
 - `heterogeneity_check.py` -- runs the HDBSCAN heterogeneity
   check on each downloaded dataset; writes the datasets that pass to
@@ -94,7 +94,7 @@ fitted tree to `figures/<dataset>/cart_tree.png`.
 
 Comparing raw RMSE values shows that the Data-Driven approach wins in
 3 of the 6 datasets, ties in 1, and loses in the remaining 2.
-By conducting the experiments, we saw that partitioning is a helpful strategy for heterogeneous virtual metrology data, but it does not generalize to every dataset. It needs enough heterogeneity in the data to be worth capturing, and enough data points overall, since splitting the training data across leaves can hurt predictive performance when it leaves too few rows per leaf. Finally, in some cases the global model already handles the heterogeneity well, leaving little room for improvement.
+In the paper, partitioning improves performance on heterogeneous fabrication data; on these public datasets, the results show that it does not help on every dataset. It needs enough heterogeneity in the data to be worth capturing, and enough data points overall, since splitting the training data across leaves can hurt predictive performance when it leaves too few rows per leaf. Finally, in some cases the global model already handles the heterogeneity well, leaving little room for improvement.
 
 *Note: AutoGluon training is not fully deterministic, so rerunning the
 pipeline may give slightly different numbers.*
