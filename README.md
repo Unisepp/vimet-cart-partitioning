@@ -80,7 +80,7 @@ public proxy for the non-disclosure production fabrication data.
 | video_transcoding | 10 | 0.838 | 0.790 | +5.67% |
 | auction_verification | 2 | 487.60 | 444.16 | +8.91% |
 | socmob | 2 | 14.92 | 13.10 | +12.22% |
-| brazilian_houses | TBD | TBD | TBD | TBD |
+| airfoil_self_noise | 2 | 1.416 | 1.299 | +8.32% |
 
 In the paper, partitioning improves performance on heterogeneous
 fabrication data. These public datasets illustrate the same effect on
@@ -92,7 +92,7 @@ data from other fields.
 - `video_transcoding`: UCI Machine Learning Repository, DOI 10.24432/C58C9K (CC BY 4.0); OpenML version, ID 44974
 - `auction_verification`: UCI Machine Learning Repository, DOI 10.24432/C52K6N (CC BY 4.0)
 - `socmob`: OpenML ID 44987, originally from StatLib; Biblarz and Raftery (1993), DOI 10.2307/2096220. Non-commercial scholarly and teaching use only.
-- `brazilian_houses`: OpenML ID 44990 (CC0)
+- `airfoil_self_noise`: UCI Machine Learning Repository, DOI 10.24432/C5VW2C (CC BY 4.0)
 
 *Note: AutoGluon training is not fully deterministic, so rerunning the
 pipeline may give slightly different numbers.*

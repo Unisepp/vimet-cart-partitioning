@@ -9,9 +9,8 @@ DATASETS = {
     "video_transcoding": 44974,
     "auction_verification": 44958,
     "socmob": 44987,
-    "airfoil_self_noise": 44957,
-    "brazilian_houses": 44990,
-}
+    "airfoil_self_noise": 44957
+    }
 
 DATA_DIR = Path("data")
 
