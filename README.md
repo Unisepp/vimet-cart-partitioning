@@ -8,7 +8,7 @@ naval_propulsion_plant
 video_transcoding
 auction_verification
 socmob
-brazilian_houses
+airfoil_self_noise
 ```
 
 These datasets are chosen to show cases where partitioning helps. They
