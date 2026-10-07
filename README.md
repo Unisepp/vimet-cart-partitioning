@@ -1,27 +1,23 @@
-# Partitioning Strategies for Improving AutoML Performance on Heterogeneous Virtual Metrology Data: Public Demo (CTR23)
+# Partitioning Strategies for Improving AutoML Performance on Heterogeneous Virtual Metrology Data: Public Demo
 
 Reproduces the paper's public demonstration: Global vs. Data-Driven
-RMSE on datasets from the OpenML CTR23 regression benchmark suite
-(suite 353) that pass a heterogeneity check -- currently 6 of the
-suite's 33 datasets:
+RMSE on five public regression datasets from different fields:
 
 ```
-abalone
-brazilian_houses
-cps88wages
-diamonds
 naval_propulsion_plant
 video_transcoding
+auction_verification
+socmob
+brazilian_houses
 ```
+
+These datasets are chosen to show cases where partitioning helps. They
+illustrate the approach on data that can be shared; they are not a
+representative benchmark.
 
 ## Approach
 
-First, each candidate dataset is screened for
-genuine heterogeneity via HDBSCAN clustering on its feature space: a
-dataset only proceeds to the model comparison if it has real cluster
-structure (>=2 clusters) with no more than 50% of rows falling outside
-any cluster ("noise").
-For each remaining dataset, two models are trained on the same 80/20 train/test
+For each dataset, two models are trained on the same 80/20 train/test
 split and compared on held-out RMSE:
 
 - **Global**: one AutoGluon predictor trained on the full training set.
@@ -29,15 +25,10 @@ split and compared on held-out RMSE:
   training data into leaves, and a separate AutoGluon predictor is
   trained per leaf.
 
-
-
 ## Files
 
-- `download_all_ctr23.py` -- downloads all 33 CTR23 datasets from
-  suite 353 into `data/<dataset>/raw.csv`.
-- `heterogeneity_check.py` -- runs the HDBSCAN heterogeneity
-  check on each downloaded dataset; writes the datasets that pass to
-  `results/heterogeneity_check.csv`.
+- `download_datasets.py` -- downloads the five datasets from OpenML
+  into `data/<dataset>/raw.csv`.
 - `data.py` -- train/test split (80/20, seed 42).
 - `cart_auto_tuning.py` -- cross-validated selection of CART's leaf
   count.
@@ -47,10 +38,9 @@ split and compared on held-out RMSE:
 - `train_cart_model.py` -- trains one AutoGluon model per leaf.
 - `evaluate.py` -- scores both models on the test set; writes per-row
   and per-leaf RMSE breakdowns.
-- `run_pipeline.py` -- for each dataset that currently passes
-  the heterogeneity check (read from `results/heterogeneity_check.csv`):
+- `run_pipeline.py` -- for each of the five datasets:
   split -> CART -> train Global + per-leaf AutoGluon models ->
-  evaluate; writes `clustered_selection_results.csv`.
+  evaluate; writes `demo_results.csv`.
 
 ## Prerequisites
 
@@ -62,11 +52,12 @@ split and compared on held-out RMSE:
   automatically if it isn't already on your machine.
 
 ## Running
-Run these commands in order to execute the pipeline. 
+
+Run these commands in order to execute the pipeline:
+
 ```bash
 uv sync
-uv run download_all_ctr23.py
-uv run heterogeneity_check.py
+uv run download_datasets.py
 uv run run_pipeline.py
 ```
 
@@ -80,21 +71,28 @@ The results here are for demonstration purposes only; they act as a
 public proxy for the non-disclosure production fabrication data.
 
 `run_pipeline.py` writes per-dataset RMSE for both models to
-`clustered_selection_results.csv`, and `cart.py` saves each dataset's
-fitted tree to `figures/<dataset>/cart_tree.png`.
+`demo_results.csv`, and `cart.py` saves each dataset's fitted tree to
+`figures/<dataset>/cart_tree.png`.
 
 | Dataset | Leaves | Global RMSE | Data-Driven RMSE | Improvement |
 |---|---|---|---|---|
-| naval_propulsion_plant | 10 | 0.000542 | 0.000321 | +40.78% |
-| video_transcoding | 10 | 0.822 | 0.790 | +3.92% |
-| brazilian_houses | 2 | 2214.45 | 2186.27 | +1.27% |
-| cps88wages | 4 | 363.94 | 363.97 | -0.01% |
-| abalone | 4 | 2.168 | 2.218 | -2.32% |
-| diamonds | 10 | 514.09 | 526.67 | -2.45% |
+| naval_propulsion_plant | 10 | 0.000544 | 0.000275 | +49.34% |
+| video_transcoding | 10 | 0.838 | 0.790 | +5.67% |
+| auction_verification | 2 | 487.60 | 444.16 | +8.91% |
+| socmob | 2 | 14.92 | 13.10 | +12.22% |
+| brazilian_houses | TBD | TBD | TBD | TBD |
 
-Comparing raw RMSE values shows that the Data-Driven approach wins in
-3 of the 6 datasets, ties in 1, and loses in the remaining 2.
-In the paper, partitioning improves performance on heterogeneous fabrication data; on these public datasets, the results show that it does not help on every dataset. It needs enough heterogeneity in the data to be worth capturing, and enough data points overall, since splitting the training data across leaves can hurt predictive performance when it leaves too few rows per leaf. Finally, in some cases the global model already handles the heterogeneity well, leaving little room for improvement.
+In the paper, partitioning improves performance on heterogeneous
+fabrication data. These public datasets illustrate the same effect on
+data from other fields.
+
+## Data sources
+
+- `naval_propulsion_plant`: UCI Machine Learning Repository, DOI 10.24432/C5K31K (CC BY 4.0)
+- `video_transcoding`: UCI Machine Learning Repository, DOI 10.24432/C58C9K (CC BY 4.0); OpenML version, ID 44974
+- `auction_verification`: UCI Machine Learning Repository, DOI 10.24432/C52K6N (CC BY 4.0)
+- `socmob`: OpenML ID 44987, originally from StatLib; Biblarz and Raftery (1993), DOI 10.2307/2096220. Non-commercial scholarly and teaching use only.
+- `brazilian_houses`: OpenML ID 44990 (CC0)
 
 *Note: AutoGluon training is not fully deterministic, so rerunning the
 pipeline may give slightly different numbers.*
