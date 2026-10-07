@@ -1,7 +1,7 @@
 [project]
 name = "vimet-cart-partitioning"
 version = "0.1.0"
-description = "Public demo (CTR-23): Global vs. Data-Driven RMSE comparison via HDBSCAN-screened, CART-based partitioning."
+description = "Public demo: Global vs. Data-Driven RMSE comparison via CART-based partitioning on five public regression datasets."
 requires-python = "==3.12.7"
 dependencies = [
     "pandas",
@@ -10,9 +10,6 @@ dependencies = [
     "matplotlib",
     "openml",
     "autogluon.tabular[all]",
-    "diptest",
-    "scipy",
-    "requests",
 ]
 
 [tool.uv]
