@@ -1,31 +1,41 @@
-"""Data-Driven model: one AutoGluon predictor per CART leaf."""
-import os
-import pandas as pd
-from autogluon.tabular import TabularPredictor, TabularDataset
+"""Download the public demo datasets from OpenML into data/<dataset>/raw.csv."""
 
-TARGET = "target"
-SAVE_ROOT = "models/per_leaf_medium_notimelimit"
+from pathlib import Path
 
+import openml
 
-def train(train_csv="data/train_df_with_leaf.csv", target_col=TARGET, save_root=SAVE_ROOT):
-    train_df = pd.read_csv(train_csv)
-    leaf_models = {}
-    for leaf_id, df_leaf in train_df.groupby("leaf_id"):
-        X_train_leaf = df_leaf.drop(columns=["leaf_id"])
-        predictor = TabularPredictor(
-            label=target_col, eval_metric="rmse", problem_type="regression",
-            path=os.path.join(save_root, f"leaf_{leaf_id}"),
-        ).fit(train_data=TabularDataset(X_train_leaf), presets="medium", auto_stack=False)
-        leaf_models[leaf_id] = predictor
-    return leaf_models
+DATASETS = {
+    "naval_propulsion_plant": 44969,
+    "video_transcoding": 44974,
+    "auction_verification": 44958,
+    "socmob": 44987,
+    "airfoil_self_noise": 44957,
+    "brazilian_houses": 44990,
+}
+
+DATA_DIR = Path("data")
 
 
-def load(save_root=SAVE_ROOT, train_df=None, train_csv="data/train_df_with_leaf.csv"):
-    if train_df is None:
-        train_df = pd.read_csv(train_csv)
-    leaf_id_list = list(train_df["leaf_id"].unique())
-    return {leaf_id: TabularPredictor.load(os.path.join(save_root, f"leaf_{leaf_id}")) for leaf_id in leaf_id_list}
+def download(name: str, dataset_id: int) -> None:
+    dataset = openml.datasets.get_dataset(
+        dataset_id,
+        download_data=True,
+        download_qualities=False,
+        download_features_meta_data=False,
+    )
+    X, y, _, _ = dataset.get_data(
+        target=dataset.default_target_attribute,
+        include_ignore_attribute=False,
+    )
+    df = X.copy()
+    df["target"] = y
+
+    out_dir = DATA_DIR / name
+    out_dir.mkdir(parents=True, exist_ok=True)
+    df.to_csv(out_dir / "raw.csv", index=False)
+    print(f"[ok] {name} (OpenML {dataset_id}): {len(df)} rows, {df.shape[1] - 1} features")
 
 
 if __name__ == "__main__":
-    train()
+    for name, dataset_id in DATASETS.items():
+        download(name, dataset_id)
