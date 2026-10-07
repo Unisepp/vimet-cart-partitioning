@@ -627,22 +627,6 @@ wheels = [
 ]
 
 [[package]]
-name = "diptest"
-version = "0.11.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "numpy" },
-    { name = "psutil" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/5e/0b/92a00796fb3a7e0fd1aea26ebcacfd6282857789ea72e847662e5103b24e/diptest-0.11.0.tar.gz", hash = "sha256:cd74d61d4e2620aa4c40900b7ff0ff48b7517fd00871c9066f737ba4081b2f81", size = 88751, upload-time = "2026-04-24T15:02:30.192Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/7b/99/1e42c734b0695aec2aef68ab1691bc1b0f602b38e72c06f086c5968ed8fd/diptest-0.11.0-cp312-cp312-macosx_13_0_arm64.whl", hash = "sha256:7d2b8822daabbd11b0a4e4d8356e3116db8adc0a4b67b49d487fbc8809264d54", size = 382111, upload-time = "2026-04-24T15:01:59.322Z" },
-    { url = "https://files.pythonhosted.org/packages/19/81/7ee938c02e8592e63bb4affb978ec1a7038ecc84c43a16b2942e65648cef/diptest-0.11.0-cp312-cp312-macosx_13_0_x86_64.whl", hash = "sha256:e2fc655e90250ffb031e616ec78e28b6c74d90ad5cfe5e84f2b9b44c417a595f", size = 421931, upload-time = "2026-04-24T15:02:00.881Z" },
-    { url = "https://files.pythonhosted.org/packages/ac/ac/34d243df356728f3d1d97ea380341a65a5cbd09a52aeb40d449cddd6a450/diptest-0.11.0-cp312-cp312-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:b6748d22df28b030b34b2d47f257d45520564b63f20330ab507c888995d6b272", size = 238025, upload-time = "2026-04-24T15:02:02.362Z" },
-    { url = "https://files.pythonhosted.org/packages/e5/6b/ba30e2c6c748c54d75c6d08fde2c52a10edff987c7767be19468fea9bbf9/diptest-0.11.0-cp312-cp312-win_amd64.whl", hash = "sha256:e886ff65bc938188ec65530ce377063c87ea356bf65c5e1f80e5aacb862aebb0", size = 403543, upload-time = "2026-04-24T15:02:03.634Z" },
-]
-
-[[package]]
 name = "distlib"
 version = "0.4.3"
 source = { registry = "https://pypi.org/simple" }
@@ -2764,27 +2748,21 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "autogluon-tabular", extra = ["all"] },
-    { name = "diptest" },
     { name = "matplotlib" },
     { name = "numpy" },
     { name = "openml" },
     { name = "pandas" },
-    { name = "requests" },
     { name = "scikit-learn" },
-    { name = "scipy" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "autogluon-tabular", extras = ["all"] },
-    { name = "diptest" },
     { name = "matplotlib" },
     { name = "numpy" },
     { name = "openml" },
     { name = "pandas" },
-    { name = "requests" },
     { name = "scikit-learn" },
-    { name = "scipy" },
 ]
 
 [[package]]
