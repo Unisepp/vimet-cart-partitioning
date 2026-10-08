@@ -12,9 +12,7 @@ airfoil_self_noise
 ```
 
 These datasets are chosen to show cases where partitioning helps. They
-illustrate the approach on data that can be shared; they are not a
-representative benchmark.
-
+illustrate the approach on data that can be shared.
 ## Approach
 
 For each dataset, two models are trained on the same 80/20 train/test
@@ -77,7 +75,7 @@ public proxy for the non-disclosure production fabrication data.
 | Dataset | Leaves | Global RMSE | Data-Driven RMSE | Improvement |
 |---|---|---|---|---|
 | naval_propulsion_plant | 10 | 0.000544 | 0.000275 | +49.34% |
-| video_transcoding | 10 | 0.838 | 0.790 | +5.67% |
+| video_transcoding | 14 | 0.838 | 0.794 | +5.20% |
 | auction_verification | 2 | 487.60 | 444.16 | +8.91% |
 | socmob | 2 | 14.92 | 13.10 | +12.22% |
 | airfoil_self_noise | 2 | 1.416 | 1.299 | +8.32% |
