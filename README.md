@@ -80,6 +80,11 @@ public proxy for the non-disclosure production fabrication data.
 | socmob | 2 | 14.92 | 13.10 | +12.22% |
 | airfoil_self_noise | 2 | 1.416 | 1.299 | +8.32% |
 
+CART settings: the minimum number of samples per leaf is 5% of the
+training set, bounded between 300 and 800, and the number of leaves is
+selected from 2 to 15 via 3-fold cross-validation with the 1-SE rule
+(see `cart_auto_tuning.py`).
+
 In the paper, partitioning improves performance on heterogeneous
 fabrication data. These public datasets illustrate the same effect on
 data from other fields.
@@ -92,5 +97,5 @@ data from other fields.
 - `socmob`: OpenML ID 44987, originally from StatLib; Biblarz and Raftery (1993), DOI 10.2307/2096220. Non-commercial scholarly and teaching use only.
 - `airfoil_self_noise`: UCI Machine Learning Repository, DOI 10.24432/C5VW2C (CC BY 4.0)
 
-*Note: AutoGluon training is not fully deterministic, so rerunning the
-pipeline may give slightly different numbers.*
+*Note: AutoGluon training is not fully deterministic, so results may
+differ slightly on other hardware or software versions.*
