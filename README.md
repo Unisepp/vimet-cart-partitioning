@@ -66,7 +66,7 @@ without needing it activated.
 ## Results
 
 The results here are for demonstration purposes only; they act as a
-public proxy for the non-disclosure production fabrication data.
+public proxy for the proprietary fabrication data.
 
 `run_pipeline.py` writes per-dataset RMSE for both models to
 `demo_results.csv`, and `cart.py` saves each dataset's fitted tree to
@@ -74,20 +74,31 @@ public proxy for the non-disclosure production fabrication data.
 
 | Dataset | Leaves | Global RMSE | Data-Driven RMSE | Improvement |
 |---|---|---|---|---|
-| naval_propulsion_plant | 10 | 0.000544 | 0.000275 | +49.45% |
-| video_transcoding | 14 | 0.838 | 0.794 | +5.25% |
+| naval_propulsion_plant | 10 | 0.000544 | 0.000275 | +49.34% |
+| video_transcoding | 14 | 0.838 | 0.794 | +5.20% |
 | auction_verification | 2 | 487.60 | 444.16 | +8.91% |
-| socmob | 2 | 14.92 | 13.10 | +12.20% |
-| airfoil_self_noise | 2 | 1.416 | 1.299 | +8.26% |
+| socmob | 2 | 14.92 | 13.10 | +12.22% |
+| airfoil_self_noise | 2 | 1.416 | 1.299 | +8.32% |
 
 CART settings: the minimum number of samples per leaf is 5% of the
 training set, bounded between 300 and 800, and the number of leaves is
 selected from 2 to 15 via 3-fold cross-validation with the 1-SE rule
 (see `cart_auto_tuning.py`).
 
-In the paper, partitioning improves performance on heterogeneous
-fabrication data. These public datasets illustrate the same effect on
-data from other fields.
+## Differences from the fabrication pipeline
+
+This repository reproduces the public demonstration only. The pipeline
+used for the proprietary fabrication data differs as follows:
+
+- **Train/test split**: random 80/20 here; chronological 80/20 for the fabrication data, since that data is time-dependent.
+- **Feature selection**: not applied here; the fabrication data uses the feature selection described in the paper.
+- **Missingness indicators**: the fabrication pipeline appends a binary indicator for each column with missing values before fitting the tree. This step is not included here, since none of the five public datasets contains missing values.
+- **Domain-driven model**: not included, since the public datasets have no domain-driven subsets.
+- **Leaf-count grid**: fixed to 2-15 here; for the fabrication data, the
+  upper bound is the number of domain-driven subsets in each process tool
+  group.
+
+In the paper, partitioning improves performance on heterogeneous fabrication data. These public datasets illustrate the same effect on data from other fields.
 
 ## Data sources
 
