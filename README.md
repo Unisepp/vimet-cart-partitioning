@@ -74,11 +74,11 @@ public proxy for the non-disclosure production fabrication data.
 
 | Dataset | Leaves | Global RMSE | Data-Driven RMSE | Improvement |
 |---|---|---|---|---|
-| naval_propulsion_plant | 10 | 0.000544 | 0.000275 | +49.34% |
-| video_transcoding | 14 | 0.838 | 0.794 | +5.20% |
+| naval_propulsion_plant | 10 | 0.000544 | 0.000275 | +49.45% |
+| video_transcoding | 14 | 0.838 | 0.794 | +5.25% |
 | auction_verification | 2 | 487.60 | 444.16 | +8.91% |
-| socmob | 2 | 14.92 | 13.10 | +12.22% |
-| airfoil_self_noise | 2 | 1.416 | 1.299 | +8.32% |
+| socmob | 2 | 14.92 | 13.10 | +12.20% |
+| airfoil_self_noise | 2 | 1.416 | 1.299 | +8.26% |
 
 CART settings: the minimum number of samples per leaf is 5% of the
 training set, bounded between 300 and 800, and the number of leaves is
