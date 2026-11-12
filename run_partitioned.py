@@ -19,7 +19,7 @@ TARGET_COL = "target"
 OUTPUT_CSV = "demo_results_partitioned.csv"
 
 
-def main(datasets=None, data_root="data", output_path=OUTPUT_CSV, search_time_limit=60):
+def main(datasets=None, data_root="data", output_path=OUTPUT_CSV, search_time_limit=None):
     rows = []
     for name in datasets or list(DATASETS):
         print(f"\n=== {name} ===")
@@ -72,8 +72,8 @@ if __name__ == "__main__":
     parser.add_argument("--datasets", nargs="+", default=None)
     parser.add_argument("--data-root", default="data")
     parser.add_argument("--output", default=OUTPUT_CSV)
-    parser.add_argument("--search-time-limit", type=int, default=60,
-                        help="seconds per AutoGluon model during the search (default: 60)")
+    parser.add_argument("--search-time-limit", type=int, default=None,
+                        help="seconds per AutoGluon model during the search (default: no limit)")
     args = parser.parse_args()
     main(datasets=args.datasets, data_root=args.data_root, output_path=args.output,
          search_time_limit=args.search_time_limit)

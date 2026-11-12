@@ -105,7 +105,7 @@ class PartitionedRegressor:
                  min_samples_leaf_grid=(200, 300, 500, 800),
                  leaf_cap=15, max_leaf_cap=60, top_k=3,
                  small_data_rows=5000, n_folds=3, val_fraction=0.2,
-                 search_time_limit=60, final_fit_kwargs=None,
+                 search_time_limit=None, final_fit_kwargs=None,
                  random_state=42, verbosity=1):
         """
         label:                 target column.
@@ -124,7 +124,8 @@ class PartitionedRegressor:
                                of the default candidate.
         small_data_rows:       below this many rows, score with n_folds-fold CV;
                                above it, with one holdout split.
-        search_time_limit:     seconds per AutoGluon model during the search.
+        search_time_limit:     seconds per AutoGluon model during the search
+                               (default None: no limit, same as the final fit).
         final_fit_kwargs:      kwargs for the final AutoGluon fits (default:
                                presets='medium', auto_stack=False, no limit).
         """
@@ -167,6 +168,7 @@ class PartitionedRegressor:
 
         if self.search:
             candidates = self._generate_candidates(X, y, rank)
+            candidates = self._check_on_full_data(candidates, X, y)
             self.search_results_ = self._score_candidates(candidates, data, rank)
             self.chosen_ = self._select(self.search_results_)
         else:
@@ -175,7 +177,7 @@ class PartitionedRegressor:
             curve = self._cart_curve(X, y, msl, rank) if n >= 2 * msl else []
             if not curve:
                 raise ValueError(f"Too few rows ({n}) for the default min_samples_leaf={msl}.")
-            self.chosen_ = self._default_candidate(n, {msl: curve})
+            self.chosen_ = self._check_on_full_data([self._default_candidate(n, {msl: curve})], X, y)[0]
 
         self._log(f"Chosen: {self._describe(self.chosen_)}. Training final model...")
         final_dir = os.path.join(self.path, "final")
@@ -305,6 +307,34 @@ class PartitionedRegressor:
                   f"{len(candidates)} candidate(s) go to end-to-end scoring")
         return candidates
 
+    def _check_on_full_data(self, candidates, X, y):
+        """Fits each candidate's tree on the full training set so the scored
+        partition is the one that gets deployed: drops candidates that collapse
+        to 1 leaf, uses the leaf count the tree really reaches, and removes
+        duplicates this creates."""
+        checked, seen = [], set()
+        for cand in candidates:
+            tree = DecisionTreeRegressor(max_leaf_nodes=int(cand["max_leaf_nodes"]),
+                                         min_samples_leaf=int(cand["min_samples_leaf"]),
+                                         random_state=self.random_state).fit(X, y)
+            n_leaves = int(tree.get_n_leaves())
+            if n_leaves < 2:
+                self._log(f"  dropped {self._describe(cand)}: collapses to 1 leaf on the full training set")
+                continue
+            if n_leaves != cand["max_leaf_nodes"]:
+                self._log(f"  {self._describe(cand)}: only {n_leaves} leaves on the full training set, using {n_leaves}")
+                cand = {**cand, "max_leaf_nodes": n_leaves}
+            key = (cand["min_samples_leaf"], cand["max_leaf_nodes"])
+            if key in seen:
+                continue
+            seen.add(key)
+            checked.append(cand)
+        if not checked:
+            raise ValueError("No candidate splits the full training set into 2 or more leaves.")
+        if len(checked) != len(candidates):
+            self._log(f"Full-data check: {len(checked)} of {len(candidates)} candidate(s) kept")
+        return checked
+
     def _cart_curve(self, X, y, min_samples_leaf, rank):
         """CART-only k-fold CV: [(leaves, mean_rmse, se), ...]. The leaf cap
         doubles (up to max_leaf_cap) while the best leaf count sits on it."""
@@ -339,7 +369,9 @@ class PartitionedRegressor:
         splits = self._validation_splits(len(data), rank)
         scheme = f"{len(splits)}-fold CV" if len(splits) > 1 else "holdout"
         self._log(f"Stage 2: scoring end-to-end with {self.split} {scheme}")
-        search_kwargs = {"presets": "medium", "auto_stack": False, "time_limit": self.search_time_limit}
+        search_kwargs = dict(self.final_fit_kwargs)
+        if self.search_time_limit is not None:
+            search_kwargs["time_limit"] = self.search_time_limit
         search_dir = os.path.join(self.path, "_search")
         rows = []
         try:
